@@ -1,0 +1,167 @@
+{
+ "name": "S4V8",
+ "members": 96,
+ "families": 3,
+ "views": [
+  "",
+  "hf",
+  "vf",
+  "hvf",
+  "tr",
+  "trhf",
+  "trvf",
+  "trhvf"
+ ],
+ "tau": 0.29,
+ "c2": {
+  "mu": [
+   0.7759391665458679,
+   0.8455876111984253,
+   0.9064021110534668,
+   0.9612281322479248,
+   0.9966089725494385,
+   7.045319080352783,
+   0.13039259612560272,
+   0.5057427883148193,
+   2.4344606399536133
+  ],
+  "sd": [
+   0.216756671667099,
+   0.19912536442279816,
+   0.07216142117977142,
+   0.12230239063501358,
+   0.021987704560160637,
+   0.8735007047653198,
+   0.036428455263376236,
+   0.17729535698890686,
+   0.42413604259490967
+  ],
+  "weight": [
+   0.8360626101493835,
+   -0.1323096752166748,
+   0.034564059227705,
+   0.029925718903541565,
+   0.031040288507938385,
+   0.1331462562084198,
+   0.19267027080059052,
+   -0.08540165424346924,
+   -0.07318045943975449
+  ],
+  "bias": -0.45209187269210815
+ },
+ "models": [
+  {
+   "id": "ep24_fold0",
+   "kind": "rcnn",
+   "family": 0,
+   "fold": 0,
+   "size": 1536,
+   "input_mode": "gray",
+   "weights": "weights/ep24_fold0_det.pt",
+   "refiner": "weights/ep24_fold0_ref.pt"
+  },
+  {
+   "id": "ep24_fold1",
+   "kind": "rcnn",
+   "family": 0,
+   "fold": 1,
+   "size": 1536,
+   "input_mode": "gray",
+   "weights": "weights/ep24_fold1_det.pt",
+   "refiner": "weights/ep24_fold1_ref.pt"
+  },
+  {
+   "id": "ep24_fold2",
+   "kind": "rcnn",
+   "family": 0,
+   "fold": 2,
+   "size": 1536,
+   "input_mode": "gray",
+   "weights": "weights/ep24_fold2_det.pt",
+   "refiner": "weights/ep24_fold2_ref.pt"
+  },
+  {
+   "id": "e034_fold0",
+   "kind": "rcnn",
+   "family": 1,
+   "fold": 0,
+   "size": 1536,
+   "input_mode": "phys",
+   "weights": "weights/e034_fold0_det.pt",
+   "refiner": "weights/e034_fold0_ref.pt"
+  },
+  {
+   "id": "e034_fold1",
+   "kind": "rcnn",
+   "family": 1,
+   "fold": 1,
+   "size": 1536,
+   "input_mode": "phys",
+   "weights": "weights/e034_fold1_det.pt",
+   "refiner": "weights/e034_fold1_ref.pt"
+  },
+  {
+   "id": "e034_fold2",
+   "kind": "rcnn",
+   "family": 1,
+   "fold": 2,
+   "size": 1536,
+   "input_mode": "phys",
+   "weights": "weights/e034_fold2_det.pt",
+   "refiner": "weights/e034_fold2_ref.pt"
+  },
+  {
+   "id": "D1_fold0",
+   "kind": "dense",
+   "family": 2,
+   "fold": 0,
+   "weights": "weights/D1_fold0.pt"
+  },
+  {
+   "id": "D1_fold1",
+   "kind": "dense",
+   "family": 2,
+   "fold": 1,
+   "weights": "weights/D1_fold1.pt"
+  },
+  {
+   "id": "D1_fold2",
+   "kind": "dense",
+   "family": 2,
+   "fold": 2,
+   "weights": "weights/D1_fold2.pt"
+  },
+  {
+   "id": "D2_fold0",
+   "kind": "dense",
+   "family": 2,
+   "fold": 0,
+   "weights": "weights/D2_fold0.pt"
+  },
+  {
+   "id": "D2_fold1",
+   "kind": "dense",
+   "family": 2,
+   "fold": 1,
+   "weights": "weights/D2_fold1.pt"
+  },
+  {
+   "id": "D2_fold2",
+   "kind": "dense",
+   "family": 2,
+   "fold": 2,
+   "weights": "weights/D2_fold2.pt"
+  }
+ ],
+ "c2_columns": [
+  "fused",
+  "vote",
+  "mean_present",
+  "fams",
+  "views",
+  "log_area",
+  "contrast",
+  "dist",
+  "log_ncand"
+ ]
+}

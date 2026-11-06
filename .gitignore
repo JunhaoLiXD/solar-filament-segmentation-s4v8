@@ -1,0 +1,12 @@
+weights/
+weights_retrained/
+weights_retrained.sha256
+params_retrained.json
+train_runs/
+train_runs_smoke/
+submission*.csv
+submission*.stats.json
+evaluation_run.json
+c2_retrained.json
+__pycache__/
+.ipynb_checkpoints/

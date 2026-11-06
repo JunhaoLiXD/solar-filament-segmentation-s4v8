@@ -1,0 +1,589 @@
+{
+ "note": "How each delivered checkpoint was trained. Script copies in train/ are byte-identical to the scripts that ran, except that the Mask R-CNN runs for folds 1 and 2 used copies whose only difference is the default of --fold (passed explicitly in the command). D1 was trained by an earlier revision of dense_unet.py (its sha256 below) that did not yet have the --seed option; its fixed seed equals the current default 20261027. D2 used dense_unet.py exactly. \"args\" is the argument list after the Python interpreter; \"<data>\" stands for the training data folder and is replaced as one argument. The README table shows short forms; the full arguments are here.",
+ "scripts": {
+  "maskrcnn_ep24.py": "3665fb411fae76f8a3e08dc7adf5da078f62a501dc81e67dcc581872355000be",
+  "maskrcnn_e034.py": "9e85299e23e7c1854adf65900c3dcd7bcfe424a90e24579c602d554e1787702c",
+  "dense_unet.py": "307d912e99b719595c0be32ced26700663b4bab6eb29019f9657f02c1a5a55b9",
+  "fit_c2.py": "de0173c0df0d382ffeaef82304602db71ce7243031875df735f6ebddbccb725b",
+  "collect.py": "d63ecf6c6e57df6af0ba4a70012675ac3483029ede5f8ebbd8a35c2827cdc014",
+  "folds.csv": "6316d1e5cd628f01b0073ab12caea91c38533a4e31366e2a1360a6863115b6ec"
+ },
+ "models": [
+  {
+   "id": "ep24_fold0",
+   "weights_sha256": {
+    "weights": "04df4f38ebd3fae4fa84d4a393c793cb32c0f45d66ae24385680fa4901c084dd",
+    "refiner": "46f1a0c3b4058d70df116c11491af17c2aca0b1837e9b6e5a81f153b98551624"
+   },
+   "platform": "Kaggle, 2 x Tesla T4, DDP (2 ranks, batch 1 each)",
+   "source_sha256": "3665fb411fae76f8a3e08dc7adf5da078f62a501dc81e67dcc581872355000be",
+   "source_equals_kernel_script": true,
+   "command": "python train/maskrcnn_ep24.py --input <data> --output train_runs/ep24_fold0 --fold 0",
+   "settings": {
+    "seed": 2027,
+    "image_size": 1536,
+    "input_mode": "gray",
+    "det_epochs": 24,
+    "ref_epochs": 8,
+    "train_records": "selected",
+    "pretrained": true
+   },
+   "pretrained": [
+    {
+     "enum": "MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1",
+     "url": "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth",
+     "sha256": "73cbd0190fcbe3ba339921fbce2c3a0b6bb9126c9a133c85e43a2a8e060a109e"
+    },
+    {
+     "enum": "ResNet18_Weights.IMAGENET1K_V1",
+     "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+     "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+    }
+   ],
+   "args": [
+    "train/maskrcnn_ep24.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/ep24_fold0",
+    "--fold",
+    "0"
+   ]
+  },
+  {
+   "id": "ep24_fold1",
+   "weights_sha256": {
+    "weights": "6dc10f124b05b3a03974afba5f8fb4160caf76b8f626080ce4be21bfcfc6240a",
+    "refiner": "6960d544a3827a36b4b7bfb639fb05ac96aadc01002b41393d2f96006a88859a"
+   },
+   "platform": "Kaggle, 2 x Tesla T4, DDP (2 ranks, batch 1 each)",
+   "source_sha256": "4ababbbee156a39ba8d6bb37491fe2ea6e792646f1a3ed4b7b73f13433570540",
+   "source_equals_kernel_script": true,
+   "command": "python train/maskrcnn_ep24.py --input <data> --output train_runs/ep24_fold1 --fold 1",
+   "settings": {
+    "seed": 2027,
+    "image_size": 1536,
+    "input_mode": "gray",
+    "det_epochs": 24,
+    "ref_epochs": 8,
+    "train_records": "selected",
+    "pretrained": true
+   },
+   "pretrained": [
+    {
+     "enum": "MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1",
+     "url": "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth",
+     "sha256": "73cbd0190fcbe3ba339921fbce2c3a0b6bb9126c9a133c85e43a2a8e060a109e"
+    },
+    {
+     "enum": "ResNet18_Weights.IMAGENET1K_V1",
+     "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+     "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+    }
+   ],
+   "args": [
+    "train/maskrcnn_ep24.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/ep24_fold1",
+    "--fold",
+    "1"
+   ]
+  },
+  {
+   "id": "ep24_fold2",
+   "weights_sha256": {
+    "weights": "e4f682fbed6a2b474f003cd6f7b86aed41300ade1b1be6bce3bde5adf1da8997",
+    "refiner": "f572d3bceb6448f286c10083fccdcbe5f1198eb421032b64b94f851f5c88e47f"
+   },
+   "platform": "Kaggle, 2 x Tesla T4, DDP (2 ranks, batch 1 each)",
+   "source_sha256": "5388fc9ba82dc4427fe37b5cc015360f2885eb5f3f10bdfadd0455e41d03abbd",
+   "source_equals_kernel_script": true,
+   "command": "python train/maskrcnn_ep24.py --input <data> --output train_runs/ep24_fold2 --fold 2",
+   "settings": {
+    "seed": 2027,
+    "image_size": 1536,
+    "input_mode": "gray",
+    "det_epochs": 24,
+    "ref_epochs": 8,
+    "train_records": "selected",
+    "pretrained": true
+   },
+   "pretrained": [
+    {
+     "enum": "MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1",
+     "url": "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth",
+     "sha256": "73cbd0190fcbe3ba339921fbce2c3a0b6bb9126c9a133c85e43a2a8e060a109e"
+    },
+    {
+     "enum": "ResNet18_Weights.IMAGENET1K_V1",
+     "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+     "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+    }
+   ],
+   "args": [
+    "train/maskrcnn_ep24.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/ep24_fold2",
+    "--fold",
+    "2"
+   ]
+  },
+  {
+   "id": "e034_fold0",
+   "weights_sha256": {
+    "weights": "14ccaf72299570fc0252bca54f1fca700acba4c8237627abd3804db2be404bf9",
+    "refiner": "977ee73d6c15baa49453154ab8fd410b078a6a581e25b4d34dc961ea7c7e2485"
+   },
+   "platform": "Kaggle, 2 x Tesla T4, DDP (2 ranks, batch 1 each)",
+   "source_sha256": "9e85299e23e7c1854adf65900c3dcd7bcfe424a90e24579c602d554e1787702c",
+   "source_equals_kernel_script": true,
+   "command": "python train/maskrcnn_e034.py --input <data> --output train_runs/e034_fold0 --fold 0",
+   "settings": {
+    "seed": 2027,
+    "image_size": 1536,
+    "input_mode": "phys",
+    "det_epochs": 10,
+    "ref_epochs": 8,
+    "train_records": "selected",
+    "pretrained": true
+   },
+   "pretrained": [
+    {
+     "enum": "MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1",
+     "url": "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth",
+     "sha256": "73cbd0190fcbe3ba339921fbce2c3a0b6bb9126c9a133c85e43a2a8e060a109e"
+    },
+    {
+     "enum": "ResNet18_Weights.IMAGENET1K_V1",
+     "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+     "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+    }
+   ],
+   "args": [
+    "train/maskrcnn_e034.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/e034_fold0",
+    "--fold",
+    "0"
+   ]
+  },
+  {
+   "id": "e034_fold1",
+   "weights_sha256": {
+    "weights": "cd8f51831acc1d176bd00f19f63fd8e0f346560a8ef78f05b903d364841e7046",
+    "refiner": "04a4e0f9cd9216cfa3e3c2b4d6cf48d1a70144849bc6e4667846f90f503973dc"
+   },
+   "platform": "Kaggle, 2 x Tesla T4, DDP (2 ranks, batch 1 each)",
+   "source_sha256": "e337bd1fdf7823d37a495d38777707256d659c117a4dffbf8c12d34671041f1f",
+   "source_equals_kernel_script": true,
+   "command": "python train/maskrcnn_e034.py --input <data> --output train_runs/e034_fold1 --fold 1",
+   "settings": {
+    "seed": 2027,
+    "image_size": 1536,
+    "input_mode": "phys",
+    "det_epochs": 10,
+    "ref_epochs": 8,
+    "train_records": "selected",
+    "pretrained": true
+   },
+   "pretrained": [
+    {
+     "enum": "MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1",
+     "url": "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth",
+     "sha256": "73cbd0190fcbe3ba339921fbce2c3a0b6bb9126c9a133c85e43a2a8e060a109e"
+    },
+    {
+     "enum": "ResNet18_Weights.IMAGENET1K_V1",
+     "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+     "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+    }
+   ],
+   "args": [
+    "train/maskrcnn_e034.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/e034_fold1",
+    "--fold",
+    "1"
+   ]
+  },
+  {
+   "id": "e034_fold2",
+   "weights_sha256": {
+    "weights": "c99cfa27b723b6500d11278ae3df1998936cbd76789a1bb9ea4bac7fadb6c89a",
+    "refiner": "e6e0307b78bcfaa77108eee623f19eadfe339c822c5b5079dce7889521e62435"
+   },
+   "platform": "Kaggle, 2 x Tesla T4, DDP (2 ranks, batch 1 each)",
+   "source_sha256": "8a3faa07e3a610db79fc4464c87b11739daf3cb43fde2d53eedffed82bebffe6",
+   "source_equals_kernel_script": true,
+   "command": "python train/maskrcnn_e034.py --input <data> --output train_runs/e034_fold2 --fold 2",
+   "settings": {
+    "seed": 2027,
+    "image_size": 1536,
+    "input_mode": "phys",
+    "det_epochs": 10,
+    "ref_epochs": 8,
+    "train_records": "selected",
+    "pretrained": true
+   },
+   "pretrained": [
+    {
+     "enum": "MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1",
+     "url": "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth",
+     "sha256": "73cbd0190fcbe3ba339921fbce2c3a0b6bb9126c9a133c85e43a2a8e060a109e"
+    },
+    {
+     "enum": "ResNet18_Weights.IMAGENET1K_V1",
+     "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+     "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+    }
+   ],
+   "args": [
+    "train/maskrcnn_e034.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/e034_fold2",
+    "--fold",
+    "2"
+   ]
+  },
+  {
+   "id": "D1_fold0",
+   "weights_sha256": {
+    "weights": "6caa38accdf1fe2c67d9d9497bdc570567138925eb22bdb7c771170943573882"
+   },
+   "platform": "local, 1 x RTX 3080 Ti",
+   "source_sha256": "71c98b9458d58634209b2e19e9515eea6ab9b979de8708e712aca630b9b38285",
+   "source_equals_copy": false,
+   "command": "python train/dense_unet.py --input <data> --output train_runs/D1_fold0 --folds-csv train/folds.csv --fold 0 --size 1536 --micro 2 --skip-pip --no-wheels --require-gpu --cap-seconds 30000 --skip-post",
+   "settings": {
+    "size": 1536,
+    "epochs": 30,
+    "batch": 8,
+    "micro": 2,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "warmup_steps": 50,
+    "encoder": "tu-convnext_tiny.fb_in22k_ft_in1k",
+    "encoder_weights": "imagenet",
+    "seed": 20261027
+   },
+   "epochs_completed": 30,
+   "args": [
+    "train/dense_unet.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/D1_fold0",
+    "--folds-csv",
+    "train/folds.csv",
+    "--fold",
+    "0",
+    "--size",
+    "1536",
+    "--micro",
+    "2",
+    "--skip-pip",
+    "--no-wheels",
+    "--require-gpu",
+    "--cap-seconds",
+    "30000",
+    "--skip-post"
+   ],
+   "pretrained": [
+    {
+     "name": "timm/convnext_tiny.fb_in22k_ft_in1k",
+     "url": "https://huggingface.co/timm/convnext_tiny.fb_in22k_ft_in1k/resolve/bc48a87f119bae1b06418f5340bfa97ef75d4609/model.safetensors",
+     "revision": "bc48a87f119bae1b06418f5340bfa97ef75d4609",
+     "sha256": "77b619e187de71bce58721689da0c009e84cc20677293d7d43105307e34d868a",
+     "licence": "Apache-2.0 (timm)",
+     "loaded_state_sha256": "e2b9a0d6791c914766ac42b4b84bf4de83db5063093a2fb40e0a73aa1e0e7f44"
+    }
+   ]
+  },
+  {
+   "id": "D1_fold1",
+   "weights_sha256": {
+    "weights": "03ee8a115881adb1e0a462f68cb06bf48a57b4ceff7f95e536f48979aaea03b0"
+   },
+   "platform": "local, 1 x RTX 3080 Ti",
+   "source_sha256": "71c98b9458d58634209b2e19e9515eea6ab9b979de8708e712aca630b9b38285",
+   "source_equals_copy": false,
+   "command": "python train/dense_unet.py --input <data> --output train_runs/D1_fold1 --folds-csv train/folds.csv --fold 1 --size 1536 --micro 2 --skip-pip --no-wheels --require-gpu --cap-seconds 30000 --skip-post",
+   "settings": {
+    "size": 1536,
+    "epochs": 30,
+    "batch": 8,
+    "micro": 2,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "warmup_steps": 50,
+    "encoder": "tu-convnext_tiny.fb_in22k_ft_in1k",
+    "encoder_weights": "imagenet",
+    "seed": 20261027
+   },
+   "epochs_completed": 30,
+   "args": [
+    "train/dense_unet.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/D1_fold1",
+    "--folds-csv",
+    "train/folds.csv",
+    "--fold",
+    "1",
+    "--size",
+    "1536",
+    "--micro",
+    "2",
+    "--skip-pip",
+    "--no-wheels",
+    "--require-gpu",
+    "--cap-seconds",
+    "30000",
+    "--skip-post"
+   ],
+   "pretrained": [
+    {
+     "name": "timm/convnext_tiny.fb_in22k_ft_in1k",
+     "url": "https://huggingface.co/timm/convnext_tiny.fb_in22k_ft_in1k/resolve/bc48a87f119bae1b06418f5340bfa97ef75d4609/model.safetensors",
+     "revision": "bc48a87f119bae1b06418f5340bfa97ef75d4609",
+     "sha256": "77b619e187de71bce58721689da0c009e84cc20677293d7d43105307e34d868a",
+     "licence": "Apache-2.0 (timm)",
+     "loaded_state_sha256": "e2b9a0d6791c914766ac42b4b84bf4de83db5063093a2fb40e0a73aa1e0e7f44"
+    }
+   ]
+  },
+  {
+   "id": "D1_fold2",
+   "weights_sha256": {
+    "weights": "1ccee7f9c9e245beb56ff87c3c7b2479b5a37cfd13612cdaeca92d09b71ed6eb"
+   },
+   "platform": "local, 1 x RTX 3080 Ti",
+   "source_sha256": "71c98b9458d58634209b2e19e9515eea6ab9b979de8708e712aca630b9b38285",
+   "source_equals_copy": false,
+   "command": "python train/dense_unet.py --input <data> --output train_runs/D1_fold2 --folds-csv train/folds.csv --fold 2 --size 1536 --micro 2 --skip-pip --no-wheels --require-gpu --cap-seconds 30000 --skip-post",
+   "settings": {
+    "size": 1536,
+    "epochs": 30,
+    "batch": 8,
+    "micro": 2,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "warmup_steps": 50,
+    "encoder": "tu-convnext_tiny.fb_in22k_ft_in1k",
+    "encoder_weights": "imagenet",
+    "seed": 20261027
+   },
+   "epochs_completed": 30,
+   "args": [
+    "train/dense_unet.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/D1_fold2",
+    "--folds-csv",
+    "train/folds.csv",
+    "--fold",
+    "2",
+    "--size",
+    "1536",
+    "--micro",
+    "2",
+    "--skip-pip",
+    "--no-wheels",
+    "--require-gpu",
+    "--cap-seconds",
+    "30000",
+    "--skip-post"
+   ],
+   "pretrained": [
+    {
+     "name": "timm/convnext_tiny.fb_in22k_ft_in1k",
+     "url": "https://huggingface.co/timm/convnext_tiny.fb_in22k_ft_in1k/resolve/bc48a87f119bae1b06418f5340bfa97ef75d4609/model.safetensors",
+     "revision": "bc48a87f119bae1b06418f5340bfa97ef75d4609",
+     "sha256": "77b619e187de71bce58721689da0c009e84cc20677293d7d43105307e34d868a",
+     "licence": "Apache-2.0 (timm)",
+     "loaded_state_sha256": "e2b9a0d6791c914766ac42b4b84bf4de83db5063093a2fb40e0a73aa1e0e7f44"
+    }
+   ]
+  },
+  {
+   "id": "D2_fold0",
+   "weights_sha256": {
+    "weights": "c66c2dc392e6bc91d05b09f871c3bb195a130d8e7e56461debcc53621e3fdb1b"
+   },
+   "platform": "local, 1 x RTX 3080 Ti",
+   "source_sha256": "307d912e99b719595c0be32ced26700663b4bab6eb29019f9657f02c1a5a55b9",
+   "source_equals_copy": true,
+   "command": "python train/dense_unet.py --input <data> --output train_runs/D2_fold0 --folds-csv train/folds.csv --fold 0 --size 1536 --micro 2 --skip-pip --no-wheels --require-gpu --cap-seconds 30000 --skip-post --seed 20261028",
+   "settings": {
+    "size": 1536,
+    "epochs": 30,
+    "batch": 8,
+    "micro": 2,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "warmup_steps": 50,
+    "encoder": "tu-convnext_tiny.fb_in22k_ft_in1k",
+    "encoder_weights": "imagenet",
+    "seed": 20261028
+   },
+   "epochs_completed": 30,
+   "args": [
+    "train/dense_unet.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/D2_fold0",
+    "--folds-csv",
+    "train/folds.csv",
+    "--fold",
+    "0",
+    "--size",
+    "1536",
+    "--micro",
+    "2",
+    "--skip-pip",
+    "--no-wheels",
+    "--require-gpu",
+    "--cap-seconds",
+    "30000",
+    "--skip-post",
+    "--seed",
+    "20261028"
+   ],
+   "pretrained": [
+    {
+     "name": "timm/convnext_tiny.fb_in22k_ft_in1k",
+     "url": "https://huggingface.co/timm/convnext_tiny.fb_in22k_ft_in1k/resolve/bc48a87f119bae1b06418f5340bfa97ef75d4609/model.safetensors",
+     "revision": "bc48a87f119bae1b06418f5340bfa97ef75d4609",
+     "sha256": "77b619e187de71bce58721689da0c009e84cc20677293d7d43105307e34d868a",
+     "licence": "Apache-2.0 (timm)",
+     "loaded_state_sha256": "e2b9a0d6791c914766ac42b4b84bf4de83db5063093a2fb40e0a73aa1e0e7f44"
+    }
+   ]
+  },
+  {
+   "id": "D2_fold1",
+   "weights_sha256": {
+    "weights": "26fd2a1272e6f287b3bdf36fb1ee26f10c14a55bf76b260a881f4150180b29b0"
+   },
+   "platform": "local, 1 x RTX 3080 Ti",
+   "source_sha256": "307d912e99b719595c0be32ced26700663b4bab6eb29019f9657f02c1a5a55b9",
+   "source_equals_copy": true,
+   "command": "python train/dense_unet.py --input <data> --output train_runs/D2_fold1 --folds-csv train/folds.csv --fold 1 --size 1536 --micro 2 --skip-pip --no-wheels --require-gpu --cap-seconds 30000 --skip-post --seed 20261028",
+   "settings": {
+    "size": 1536,
+    "epochs": 30,
+    "batch": 8,
+    "micro": 2,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "warmup_steps": 50,
+    "encoder": "tu-convnext_tiny.fb_in22k_ft_in1k",
+    "encoder_weights": "imagenet",
+    "seed": 20261028
+   },
+   "epochs_completed": 30,
+   "args": [
+    "train/dense_unet.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/D2_fold1",
+    "--folds-csv",
+    "train/folds.csv",
+    "--fold",
+    "1",
+    "--size",
+    "1536",
+    "--micro",
+    "2",
+    "--skip-pip",
+    "--no-wheels",
+    "--require-gpu",
+    "--cap-seconds",
+    "30000",
+    "--skip-post",
+    "--seed",
+    "20261028"
+   ],
+   "pretrained": [
+    {
+     "name": "timm/convnext_tiny.fb_in22k_ft_in1k",
+     "url": "https://huggingface.co/timm/convnext_tiny.fb_in22k_ft_in1k/resolve/bc48a87f119bae1b06418f5340bfa97ef75d4609/model.safetensors",
+     "revision": "bc48a87f119bae1b06418f5340bfa97ef75d4609",
+     "sha256": "77b619e187de71bce58721689da0c009e84cc20677293d7d43105307e34d868a",
+     "licence": "Apache-2.0 (timm)",
+     "loaded_state_sha256": "e2b9a0d6791c914766ac42b4b84bf4de83db5063093a2fb40e0a73aa1e0e7f44"
+    }
+   ]
+  },
+  {
+   "id": "D2_fold2",
+   "weights_sha256": {
+    "weights": "a9db0b34844d8b9ded9f405507efc2a3ad857be3d603e3c08ac42379c7f6eeca"
+   },
+   "platform": "local, 1 x RTX 3080 Ti",
+   "source_sha256": "307d912e99b719595c0be32ced26700663b4bab6eb29019f9657f02c1a5a55b9",
+   "source_equals_copy": true,
+   "command": "python train/dense_unet.py --input <data> --output train_runs/D2_fold2 --folds-csv train/folds.csv --fold 2 --size 1536 --micro 2 --skip-pip --no-wheels --require-gpu --cap-seconds 30000 --skip-post --seed 20261028",
+   "settings": {
+    "size": 1536,
+    "epochs": 30,
+    "batch": 8,
+    "micro": 2,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "warmup_steps": 50,
+    "encoder": "tu-convnext_tiny.fb_in22k_ft_in1k",
+    "encoder_weights": "imagenet",
+    "seed": 20261028
+   },
+   "epochs_completed": 30,
+   "args": [
+    "train/dense_unet.py",
+    "--input",
+    "<data>",
+    "--output",
+    "train_runs/D2_fold2",
+    "--folds-csv",
+    "train/folds.csv",
+    "--fold",
+    "2",
+    "--size",
+    "1536",
+    "--micro",
+    "2",
+    "--skip-pip",
+    "--no-wheels",
+    "--require-gpu",
+    "--cap-seconds",
+    "30000",
+    "--skip-post",
+    "--seed",
+    "20261028"
+   ],
+   "pretrained": [
+    {
+     "name": "timm/convnext_tiny.fb_in22k_ft_in1k",
+     "url": "https://huggingface.co/timm/convnext_tiny.fb_in22k_ft_in1k/resolve/bc48a87f119bae1b06418f5340bfa97ef75d4609/model.safetensors",
+     "revision": "bc48a87f119bae1b06418f5340bfa97ef75d4609",
+     "sha256": "77b619e187de71bce58721689da0c009e84cc20677293d7d43105307e34d868a",
+     "licence": "Apache-2.0 (timm)",
+     "loaded_state_sha256": "e2b9a0d6791c914766ac42b4b84bf4de83db5063093a2fb40e0a73aa1e0e7f44"
+    }
+   ]
+  }
+ ]
+}
