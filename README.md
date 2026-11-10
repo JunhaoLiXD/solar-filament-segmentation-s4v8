@@ -12,13 +12,17 @@ Solution for the Kaggle competition `filament-segmentation-2026`.
    - Mask R-CNN `ep24`: grey x 3 channels.
    - Mask R-CNN `e034`: grey, limb-darkening-flattened and multi-scale black top-hat channels, all computed from the image alone.
    - Dense U-Nets `D1` and `D2`: one grey channel (PIL box resize), standardised per image.
-2. **Detector members.** Two Mask R-CNN R50-FPN v2 families (`ep24`, `e034`), each with a ResNet18 U-Net crop refiner.
-3. **Dense members.** Two ConvNeXt-T U-Net families (`D1`, `D2`). Instances are 8-connected components of probability above 0.5 with at least 64 pixels.
-4. **Test-time augmentation.** Each of the 12 fold models runs on 8 flip and transpose views, giving 96 members.
-5. **Fusion.** Instances are clustered at IoU above 0.5. A cluster's fused score is the sum of its member confidences divided by the number of members; clusters below 0.30 are dropped, then NMS and overlap removal.
-6. **Rescoring (C2).** A logistic regression on 9 instance features keeps instances scoring at least tau = 0.29.
+2. **Detector members.** Two Mask R-CNN R50-FPN v2 families (`ep24`, `e034`). Detections with score at least 0.4 go through mask thresholding and NMS, then a ResNet18 U-Net crop refiner redraws each mask from a crop of the original image.
+3. **Dense members.** Two ConvNeXt-T U-Net families (`D1`, `D2`, the same architecture with two seeds). Instances are 8-connected components of probability above 0.5 with at least 64 pixels.
+4. **Test-time augmentation.** Each of the 12 fold models (4 families x 3 folds) runs on 8 flip and transpose views, giving 96 members. Predictions are mapped back to the original orientation.
+5. **Fusion.**
+   - All member instances are sorted by score. Each instance joins the first cluster whose anchor (its highest-scoring instance) it overlaps at IoU above 0.5, provided that member is not already in the cluster; otherwise it starts a new cluster.
+   - A cluster's fused score is the sum of its member confidences divided by the number of members (96). Clusters below 0.30 are dropped.
+   - A cluster's mask is the pixel-wise majority vote of its members' masks.
+   - Clusters are taken in order of fused score. A cluster is skipped when its intersection with an already kept mask covers at least half of the smaller of the two; otherwise the pixels already taken are removed from it. No pixel belongs to two instances.
+6. **Rescoring (C2).** A logistic regression on 9 instance features keeps instances scoring at least tau = 0.29. The features are the fused score, vote share, mean member score where present, share of families that found the instance, number of views, log area, contrast with the surroundings, distance of the instance centre from the image centre and log number of candidates in the image. For the family share, `D1` and `D2` count as one family, so `params.json` has `"families": 3`.
 
-`params.json` holds the members, views, C2 parameters and tau. The fixed thresholds of fusion and instance extraction are constants in `code/` (for example `e042_rescore.py` FLOOR 0.30, `e056_infer.py` THR 0.5 and MIN_AREA 64). No training labels, out-of-fold data or cached predictions are read at inference.
+`params.json` holds the members, views, C2 parameters and tau. The fixed thresholds of fusion and instance extraction are constants in `code/` (for example `e042_rescore.py` FLOOR 0.30, `f1_fusion.py` MATCH 0.5, `e056_infer.py` THR 0.5 and MIN_AREA 64, `s1_candidates.py` NMS and refiner thresholds). No training labels, out-of-fold data or cached predictions are read at inference. `code/README.md` maps the modules.
 
 ## Results
 | Measure | Value |
@@ -32,7 +36,23 @@ How to read the second figure:
 - C2 and tau are fitted on two folds' candidates and applied to the third.
 - The base models behind those two folds were trained with the evaluated fold included. So this leaves out the C2 layer only; it is not a fully nested cross-validation of the whole pipeline.
 
-Both out-of-fold figures come from development data that we reused many times. S4V8 was also chosen among 14 slimmed variants, so both are optimistic. On our early submissions the public score was 0.06 to 0.07 below the out-of-fold score. Dice, IoU and one-to-many distributions are in `docs/rubric-metrics.md`. Their definitions are ours, because the competition page does not fix them.
+Both out-of-fold figures come from development data that we reused many times. S4V8 was also chosen among 14 slimmed variants, so both are optimistic. On our early submissions the public score was 0.06 to 0.07 below the out-of-fold score; we have not established the cause of that gap. Dice, IoU and one-to-many distributions are in `docs/rubric-metrics.md`. Their definitions are ours, because the competition page does not fix them.
+
+## Requirements
+- Python 3.13 (the version we developed and tested with).
+- One CUDA GPU with at least 4 GiB of memory (peak 3.48 GiB). CPU-only inference is not supported.
+- An NVIDIA driver that supports the CUDA 12.8 wheels of PyTorch 2.11.
+- About 7 GB of disk: 2.2 GB of weight parts, 2.1 GB of reassembled weights, plus the git history and the data.
+
+## Data
+The competition images are not part of this repository. Download them from the competition page (the Kaggle API needs your own credentials and accepted competition rules):
+
+```bash
+kaggle competitions download -c filament-segmentation-2026
+unzip filament-segmentation-2026.zip -d data
+```
+
+The test images are then in `data/MAGFiLO_1.0_Kaggle_2026/test/test_images/*.jpg` (180 images). Training and the out-of-fold evaluation need the folder that holds `train/train_images/` and `train/MAGFiLO_1.0_Annotations_kaggle2026_train.json`, that is `S4V8_TRAIN_DATA=data/MAGFiLO_1.0_Kaggle_2026`.
 
 ## Run (stored weights, no training)
 The weights are in `weight_parts/`, split into pieces of at most 90,000,000 bytes.
@@ -40,16 +60,35 @@ The weights are in `weight_parts/`, split into pieces of at most 90,000,000 byte
 ```bash
 pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu128
 python assemble_weights.py
-python code/e080_infer.py --images <folder with test jpg> --out submission.csv
+python code/e080_infer.py --images data/MAGFiLO_1.0_Kaggle_2026/test/test_images --out submission.csv
 ```
 
 `assemble_weights.py` uses only the standard library. It checks every part and every rebuilt file against SHA-256 and stops on a mismatch.
 
-`demo.ipynb` runs the whole pipeline in order: preprocessing, optional training, inference with post-processing, evaluation, and pictures. By default it loads the stored weights and does not train.
+`demo.ipynb` runs the whole pipeline in order: preprocessing, optional training, inference with post-processing, evaluation, and pictures. It is configured by environment variables read in its first cell; paths are relative to the repository root:
 
-Speed and memory:
-- One RTX 3080 Ti: about 14.4 s per image, 3.77 GiB RAM, 3.48 GiB GPU memory.
-- Kaggle T4: 41.3 s per image.
+| Variable | Default | Meaning |
+|---|---|---|
+| `S4V8_IMAGES` | `test_images` | folder with the test images |
+| `S4V8_LIMIT` | `3` | number of test images for a quick look; `0` = all 180 |
+| `S4V8_TRAIN` | `0` | `1` retrains every model (section 3) instead of loading the stored weights |
+| `S4V8_TRAIN_DATA` | `train_data` | competition data folder, needed only for training or evaluation |
+| `S4V8_EVALUATE` | `0` | `1` recomputes the out-of-fold evaluation (about 1 GPU hour) |
+
+```bash
+S4V8_IMAGES=data/MAGFiLO_1.0_Kaggle_2026/test/test_images S4V8_LIMIT=0 jupyter nbconvert --to notebook --execute demo.ipynb --output demo_executed.ipynb
+```
+
+## Reproduce the submitted file
+The command in "Run", or the notebook with `S4V8_LIMIT=0`, predicts all 180 test images. Our submitted file has:
+- 1116 rows, instances on 177 of 180 images;
+- SHA-256 `69d5141c7aab0f912fe5ff6544279a702b2a1a1eef60881d6d264935b9c6661f`.
+
+On our development machine (Windows, Python 3.13, RTX 3080 Ti) the output is byte-identical to this file. On other systems expect small numeric differences: on a Kaggle T4 we obtained 1115 rows and mean IoU 0.9992 with the submitted instances (see "Reproducibility").
+
+Time and memory for the 180 images:
+- One RTX 3080 Ti: 2586 s (14.4 s per image), 3.77 GiB RAM, 3.48 GiB GPU memory.
+- Kaggle T4: 7436 s (41.3 s per image).
 
 ## Training
 Everything needed to retrain is in `train/`. The settings of every delivered checkpoint are in `train/provenance.json`: script hash, full arguments, seed, epochs, and the pretrained initial weights with URL (Hugging Face revision for ConvNeXt-T) and SHA-256.
@@ -70,10 +109,11 @@ How the folds work:
 - C2 is fitted only on out-of-fold candidates.
 
 Notes:
-- The full commands are in `train/provenance.json` and in section 3 of `demo.ipynb` (`TRAIN = True` runs all of them).
+- The full commands are in `train/provenance.json` and in section 3 of `demo.ipynb` (`S4V8_TRAIN=1` runs all of them).
 - Internet is needed during training to download the pretrained initial weights.
 - On one GPU, add `--nproc 0 --accum 2` to the Mask R-CNN commands (the notebook does this). This runs without DDP and gives the same effective batch as our 2 DDP ranks of batch 1.
 - Retrained models will not be bit-identical to the delivered ones, because of GPU type, library versions and DDP.
+- The three training scripts are self-contained files built for Kaggle kernels: each carries copies of its helper modules in an `EMBEDDED` string. They are kept byte-identical to the scripts that produced the weights (hashes in `train/provenance.json`), so they were not tidied.
 
 What has been checked:
 - The training scripts in `train/` are byte-identical to the scripts that produced the delivered weights. There are two documented exceptions, listed in `train/provenance.json`:
@@ -96,7 +136,7 @@ What has been checked:
   - Score difference p99 0.00233.
 - **Checked:** a new virtual environment on the development machine (Windows, Python 3.13, RTX 3080 Ti):
   - Installing the 9 direct packages and running all 180 test images gave a CSV byte-identical to the submitted file.
-  - `requirements.txt` pins the resolved versions plus `notebook`.
+  - `requirements.txt` pins the versions that install resolved, plus `notebook`.
 - **Not checked:** this install on another operating system or GPU. The Kaggle run used other versions of numpy, OpenCV and Pillow, not these pins.
 
 ## Layout
@@ -104,15 +144,17 @@ What has been checked:
 |---|---|
 | `demo.ipynb` | End-to-end notebook: preprocessing, optional training, inference, evaluation |
 | `code/e080_infer.py` | Inference entry (`--params` selects the delivered or retrained parameters) |
-| `code/` | Modules the entry imports, copied unchanged from development |
+| `code/` | Modules the entry imports, copied unchanged from development; `code/README.md` says what each one does |
 | `train/` | Training scripts, `folds.csv`, C2 fitting, `provenance.json` |
 | `params.json` | Members, views, fusion and C2 parameters |
 | `weight_parts/`, `weight_parts.json`, `weights.sha256` | Weight pieces and hashes |
 | `docs/` | Rubric metrics and the stored out-of-fold evaluation |
 
 ## Licences and attribution
-Our code in this repository is released under the MIT licence (`LICENSE`). The competition has no OSI-specific requirement (host, discussion 755907). The delivered weights are our fine-tuned models; the terms of the pretrained initial weights they started from still apply:
+Our code in this repository is released under the MIT licence (`LICENSE`). The competition has no OSI-specific requirement (host, discussion 755907).
 
-Pretrained initial weights (URLs and SHA-256 in `train/provenance.json`):
+Method source: the Mask R-CNN plus crop-refiner design follows the public Kaggle notebook `nomannic19/cv-solar-filament-mask-r-cnn-u-net-refiner`. `code/e006_maskrcnn_refiner.py` is our own re-implementation of that method; no code from the notebook is included.
+
+The delivered weights are our fine-tuned models; the terms of the pretrained initial weights they started from still apply. Pretrained initial weights (URLs and SHA-256 in `train/provenance.json`):
 - torchvision `MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1` and `ResNet18_Weights.IMAGENET1K_V1`. torchvision code is BSD-3-Clause; the weights are under the torchvision model terms.
 - ConvNeXt-T `convnext_tiny.fb_in22k_ft_in1k` through `timm` (Apache-2.0) and `segmentation-models-pytorch` (MIT).
