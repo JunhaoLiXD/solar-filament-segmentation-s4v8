@@ -146,7 +146,7 @@ What has been checked:
 - **Checked (second Kaggle run, this repository):** a fresh `git clone` of this repository (commit 556a959, code identical to the current one) executed `demo.ipynb` unchanged on Kaggle T4 with no internet, all 180 test images, stored weights. No cell error; valid CSV; agreement with the submitted file:
   - 1116 vs 1116 rows, 180 of 180 images with equal instance counts, every instance matched in both directions.
   - Mean IoU 0.9992, IoU p01 0.9944.
-  - 9059 s for the whole notebook (49.9 s per image including weight assembly and pictures), peak RAM 3.5 GiB, peak GPU memory 3.5 GiB.
+  - Inference 49.9 s per image; the whole notebook, including weight assembly and pictures, took 9059 s (about 50.3 s per image). Peak RAM 3.5 GiB, peak GPU memory 3.5 GiB.
   - Scope: `segmentation_models_pytorch` 0.5.0 is not on the Kaggle image, so it was supplied from a copy through `PYTHONPATH`; the other packages were Kaggle's, not the pins in `requirements.txt`. The optional training and evaluation sections were not run there. The outputs saved in `demo.ipynb` come from this run.
 - **Not achieved:** numeric reproduction across systems. The member-level gate of the first Kaggle run failed and the cause was not located, so expect small differences on another system:
   - Instance-count agreement of the `ep24` detector members 99.21 %.
