@@ -60,7 +60,7 @@ What the parts contribute, out of fold (same protocol, threshold or C2 refitted 
 | all four families, 8 views, fused-score threshold | 0.461 |
 | all four families, 8 views, C2 (delivered) | 0.461 |
 
-Views and model families carry the gain. C2 adds +0.0006 over a tuned fused-score threshold (90 % paired group bootstrap interval -0.0012 to +0.0023), which is no detectable gain; it was adopted on a larger development ensemble and kept.
+Views and model families carry the gain. C2 adds +0.0006 over a tuned fused-score threshold (90 % paired group bootstrap interval -0.0012 to +0.0023), which is no detectable gain; it was adopted on an earlier three-family development ensemble and kept through later ensemble changes.
 
 ## Requirements
 - Python 3.13 (the version we developed and tested with).
