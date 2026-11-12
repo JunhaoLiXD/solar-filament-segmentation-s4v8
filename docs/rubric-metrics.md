@@ -33,7 +33,7 @@ Share per bin of 0.1:
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 5211 | 0.685 | 0.536 | 0.562 | 0.623 | 0.690 | 0.749 | 0.792 | 0.815 |
 
-Share per bin of 0.1 (true positives have IoU above 0.5 by definition):
+Share per bin of 0.1 (true positives have IoU above 0.5 by definition; the 0.9–1.0 bin holds 1 of 5211 true positives, shown as 0.0 % after rounding):
 
 | 0.5–0.6 | 0.6–0.7 | 0.7–0.8 | 0.8–0.9 | 0.9–1.0 |
 |---:|---:|---:|---:|---:|

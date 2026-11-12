@@ -7,6 +7,19 @@ Solution for the Kaggle competition `filament-segmentation-2026`.
 - Output: one binary mask per filament, in the submission CSV format.
 - Inference uses only the test H-alpha images.
 
+## Names used in this repository
+The code keeps the short identifiers from our development work. They mean:
+
+| Identifier | Meaning |
+|---|---|
+| `S4V8` | The delivered ensemble: **4** model families, **8** test-time views each |
+| `ep24` | Mask R-CNN family with grey input (24 detector epochs) and its crop refiner |
+| `e034` | Mask R-CNN family with physics input channels (10 detector epochs) and its crop refiner; named after the experiment that introduced it |
+| `D1`, `D2` | ConvNeXt-T U-Net (dense) family, trained twice with seeds 20261027 and 20261028 |
+| `C2` | The learned instance filter: logistic rescoring of fused instances with threshold tau |
+| `fold0`-`fold2` | The model trained without that fold of `train/folds.csv` |
+| `e006`, `e042`, ... in file names | Experiment numbers of our development log; see `code/README.md` for what each file does |
+
 ## Pipeline
 1. **Preprocessing.** The image is read as greyscale and resized to 1536. Each model family reads it differently:
    - Mask R-CNN `ep24`: grey x 3 channels.
@@ -18,9 +31,9 @@ Solution for the Kaggle competition `filament-segmentation-2026`.
 5. **Fusion.**
    - All member instances are sorted by score. Each instance joins the first cluster whose anchor (its highest-scoring instance) it overlaps at IoU above 0.5, provided that member is not already in the cluster; otherwise it starts a new cluster.
    - A cluster's fused score is the sum of its member confidences divided by the number of members (96). Clusters below 0.30 are dropped.
-   - A cluster's mask is the pixel-wise majority vote of its members' masks.
+   - A cluster's mask keeps the pixels covered by at least half of the cluster's members (`f1_fusion.vote_mask`). A cluster with one member, or whose vote is empty, keeps the mask of its anchor.
    - Clusters are taken in order of fused score. A cluster is skipped when its intersection with an already kept mask covers at least half of the smaller of the two; otherwise the pixels already taken are removed from it. No pixel belongs to two instances.
-6. **Rescoring (C2).** A logistic regression on 9 instance features keeps instances scoring at least tau = 0.29. The features are the fused score, vote share, mean member score where present, share of families that found the instance, number of views, log area, contrast with the surroundings, distance of the instance centre from the image centre and log number of candidates in the image. For the family share, `D1` and `D2` count as one family, so `params.json` has `"families": 3`.
+6. **Rescoring (C2).** A logistic regression on 9 instance features keeps instances scoring at least tau = 0.29. The features are the fused score, vote share (members in the cluster / 96), mean score of the members present, share of families that found the instance, share of the 8 views that found it, log area, contrast with the surroundings, distance of the instance centre from the image centre (pixel 1024, 1024) divided by 1024, and log number of instances in the image. The logistic regression is fitted on out-of-fold candidates with a soft target: the instance's IoU with the ground-truth instances it matches at IoU > 0.5, averaged over the annotation records of the image and clipped to [0, 1]. Tau is the threshold that maximises out-of-fold PQ. The output is a ranking score with a fitted threshold, not a calibrated probability that the instance is correct. For the family share, `D1` and `D2` count as one family, so `params.json` has `"families": 3`.
 
 `params.json` holds the members, views, C2 parameters and tau. The fixed thresholds of fusion and instance extraction are constants in `code/` (for example `e042_rescore.py` FLOOR 0.30, `f1_fusion.py` MATCH 0.5, `e056_infer.py` THR 0.5 and MIN_AREA 64, `s1_candidates.py` NMS and refiner thresholds). No training labels, out-of-fold data or cached predictions are read at inference. `code/README.md` maps the modules.
 
@@ -70,7 +83,7 @@ python code/e080_infer.py --images data/MAGFiLO_1.0_Kaggle_2026/test/test_images
 | Variable | Default | Meaning |
 |---|---|---|
 | `S4V8_IMAGES` | `test_images` | folder with the test images |
-| `S4V8_LIMIT` | `3` | number of test images for a quick look; `0` = all 180 |
+| `S4V8_LIMIT` | `3` | number of test images for a quick look; `0` = all 180 (the validator marks a CSV with no instance at all as invalid, which can happen on a very small subset) |
 | `S4V8_TRAIN` | `0` | `1` retrains every model (section 3) instead of loading the stored weights |
 | `S4V8_TRAIN_DATA` | `train_data` | competition data folder, needed only for training or evaluation |
 | `S4V8_EVALUATE` | `0` | `1` recomputes the out-of-fold evaluation (about 1 GPU hour) |
@@ -84,7 +97,7 @@ The command in "Run", or the notebook with `S4V8_LIMIT=0`, predicts all 180 test
 - 1116 rows, instances on 177 of 180 images;
 - SHA-256 `69d5141c7aab0f912fe5ff6544279a702b2a1a1eef60881d6d264935b9c6661f`.
 
-On our development machine (Windows, Python 3.13, RTX 3080 Ti) the output is byte-identical to this file. On other systems expect small numeric differences: on a Kaggle T4 we obtained 1115 rows and mean IoU 0.9992 with the submitted instances (see "Reproducibility").
+On our development machine (Windows, Python 3.13, RTX 3080 Ti) the output is byte-identical to this file. On other systems expect small numeric differences. On Kaggle T4 GPUs we ran it twice (see "Reproducibility"): the bundle gave 1115 rows, and a fresh clone of this repository executing `demo.ipynb` gave 1116 rows; both match the submitted instances with mean IoU 0.9992.
 
 Time and memory for the 180 images:
 - One RTX 3080 Ti: 2586 s (14.4 s per image), 3.77 GiB RAM, 3.48 GiB GPU memory.
@@ -121,16 +134,21 @@ What has been checked:
   - `D1` was trained by an earlier revision of `dense_unet.py` with the same fixed seed.
 - `train/fit_c2.py` run on the delivered weights reproduces the delivered C2 and tau. Agreement: tau equal (0.29); every C2 parameter within 0.0006 of `params.json` (707 images, 6156 candidates).
 - A one-epoch smoke run of each training script completed on our machine (Mask R-CNN at 512 px, 4 steps, no DDP; dense at 256 px). A full retrain from these scripts has not been repeated.
-- `train/collect.py` accepts the receipts of all 12 delivered runs and refuses a smoke run.
+- `train/collect.py` accepts the receipts of all 12 delivered runs and refuses our smoke runs. It checks the fold, input mode, seed, image size, epoch counts and a few other recorded settings against `train/provenance.json`; it does not check every argument (for example a reduced number of steps per epoch would pass), so compare the receipts with `provenance.json` when in doubt.
 
 ## Reproducibility: what has and has not been checked
 - **Checked:** on the development machine, this code and these weights produced a CSV byte-identical to the submitted file.
 - **Checked:** reassembling the weights in a fresh copy of this folder gave the same hashes and identical rows on 5 images.
-- **Checked:** on Kaggle T4 with no internet, all 180 test images completed and the CSV was valid. Final-layer agreement with the development machine:
+- **Checked (first Kaggle run, inference bundle):** on Kaggle T4 with no internet, all 180 test images completed and the CSV was valid. Final-layer agreement with the development machine:
   - 1115 vs 1116 rows.
   - 179 of 180 images with equal instance counts.
   - Mean IoU 0.9992.
-- **Not achieved:** numeric reproduction across systems. The member-level gate of that run failed and the cause was not located, so expect small differences on another system:
+- **Checked (second Kaggle run, this repository):** a fresh `git clone` of this repository (commit 556a959, code identical to the current one) executed `demo.ipynb` unchanged on Kaggle T4 with no internet, all 180 test images, stored weights. No cell error; valid CSV; agreement with the submitted file:
+  - 1116 vs 1116 rows, 180 of 180 images with equal instance counts, every instance matched in both directions.
+  - Mean IoU 0.9992, IoU p01 0.9944.
+  - 9059 s for the whole notebook (49.9 s per image including weight assembly and pictures), peak RAM 3.5 GiB, peak GPU memory 3.5 GiB.
+  - Scope: `segmentation_models_pytorch` 0.5.0 is not on the Kaggle image, so it was supplied from a copy through `PYTHONPATH`; the other packages were Kaggle's, not the pins in `requirements.txt`. The optional training and evaluation sections were not run there. The outputs saved in `demo.ipynb` come from this run.
+- **Not achieved:** numeric reproduction across systems. The member-level gate of the first Kaggle run failed and the cause was not located, so expect small differences on another system:
   - Instance-count agreement of the `ep24` detector members 99.21 %.
   - Member IoU p01 0.960.
   - Score difference p99 0.00233.
@@ -146,7 +164,7 @@ What has been checked:
 | `code/e080_infer.py` | Inference entry (`--params` selects the delivered or retrained parameters) |
 | `code/` | Modules the entry imports, copied unchanged from development; `code/README.md` says what each one does |
 | `train/` | Training scripts, `folds.csv`, C2 fitting, `provenance.json` |
-| `params.json` | Members, views, fusion and C2 parameters |
+| `params.json` | Members, views, C2 parameters and tau (the fixed fusion thresholds are constants in `code/`) |
 | `weight_parts/`, `weight_parts.json`, `weights.sha256` | Weight pieces and hashes |
 | `docs/` | Rubric metrics and the stored out-of-fold evaluation |
 
