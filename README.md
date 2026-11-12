@@ -51,6 +51,17 @@ How to read the second figure:
 
 Both out-of-fold figures come from development data that we reused many times. S4V8 was also chosen among 14 slimmed variants, so both are optimistic. On our early submissions the public score was 0.06 to 0.07 below the out-of-fold score; we have not established the cause of that gap. Dice, IoU and one-to-many distributions are in `docs/rubric-metrics.md`. Their definitions are ours, because the competition page does not fix them.
 
+What the parts contribute, out of fold (same protocol, threshold or C2 refitted for each configuration; computed in our development repository after the submission was selected, nothing was changed because of it):
+
+| Configuration | Out-of-fold PQ |
+|---|---:|
+| Mask R-CNN `ep24` alone, identity view, fused-score threshold | 0.428 |
+| `ep24` alone, 8 views, fused-score threshold | 0.443 |
+| all four families, 8 views, fused-score threshold | 0.461 |
+| all four families, 8 views, C2 (delivered) | 0.461 |
+
+Views and model families carry the gain. C2 adds +0.0006 over a tuned fused-score threshold (90 % paired group bootstrap interval -0.0012 to +0.0023), which is no detectable gain; it was adopted on a larger development ensemble and kept.
+
 ## Requirements
 - Python 3.13 (the version we developed and tested with).
 - One CUDA GPU with at least 4 GiB of memory (peak 3.48 GiB). CPU-only inference is not supported.
