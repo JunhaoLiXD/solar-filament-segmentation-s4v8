@@ -1,6 +1,6 @@
 # Solar filament instance segmentation: S4V8
 
-Delivered solution of team JerryMouse. This repository stays private until the competition closes and is made public at the close.
+Delivered solution of team JerryMouse.
 
 Solution for the Kaggle competition `filament-segmentation-2026`.
 - Input: H-alpha full-disk images at 2048 x 2048.
@@ -33,7 +33,7 @@ The code keeps the short identifiers from our development work. They mean:
    - A cluster's fused score is the sum of its member confidences divided by the number of members (96). Clusters below 0.30 are dropped.
    - A cluster's mask keeps the pixels covered by at least half of the cluster's members (`f1_fusion.vote_mask`). A cluster with one member, or whose vote is empty, keeps the mask of its anchor.
    - Clusters are taken in order of fused score. A cluster is skipped when its intersection with an already kept mask covers at least half of the smaller of the two; otherwise the pixels already taken are removed from it. No pixel belongs to two instances.
-6. **Rescoring (C2).** A logistic regression on 9 instance features keeps instances scoring at least tau = 0.29. The features are the fused score, vote share (members in the cluster / 96), mean score of the members present, share of families that found the instance, share of the 8 views that found it, log area, contrast with the surroundings, distance of the instance centre from the image centre (pixel 1024, 1024) divided by 1024, and log number of instances in the image. The logistic regression is fitted on out-of-fold candidates with a soft target: the instance's IoU with the ground-truth instances it matches at IoU > 0.5, averaged over the annotation records of the image and clipped to [0, 1]. Tau is the threshold that maximises out-of-fold PQ. The output is a ranking score with a fitted threshold, not a calibrated probability that the instance is correct. For the family share, `D1` and `D2` count as one family, so `params.json` has `"families": 3`.
+6. **Rescoring (C2).** A logistic regression on 9 instance features keeps instances scoring at least tau = 0.29. The features are the fused score, vote share (members in the cluster / 96), mean score of the members present, share of families that found the instance, share of the 8 views that found it, log(1 + area), contrast with the surroundings, distance of the instance centre from the image centre (pixel 1024, 1024) divided by 1024, and log(1 + number of fused candidates in the image, counted before this filter). The logistic regression is fitted on out-of-fold candidates with a soft target: the instance's IoU with the ground-truth instances it matches at IoU > 0.5, averaged over the annotation records of the image and clipped to [0, 1]. Tau is the threshold that maximises out-of-fold PQ. The output is a ranking score with a fitted threshold, not a calibrated probability that the instance is correct. For the family share, `D1` and `D2` count as one family, so `params.json` has `"families": 3`.
 
 `params.json` holds the members, views, C2 parameters and tau. The fixed thresholds of fusion and instance extraction are constants in `code/` (for example `e042_rescore.py` FLOOR 0.30, `f1_fusion.py` MATCH 0.5, `e056_infer.py` THR 0.5 and MIN_AREA 64, `s1_candidates.py` NMS and refiner thresholds). No training labels, out-of-fold data or cached predictions are read at inference. `code/README.md` maps the modules.
 
@@ -66,7 +66,7 @@ Views and model families carry the gain. C2 adds +0.0006 over a tuned fused-scor
 - Python 3.13 (the version we developed and tested with).
 - One CUDA GPU with at least 4 GiB of memory (peak 3.48 GiB). CPU-only inference is not supported.
 - An NVIDIA driver that supports the CUDA 12.8 wheels of PyTorch 2.11.
-- About 7 GB of disk: 2.2 GB of weight parts, 2.1 GB of reassembled weights, plus the git history and the data.
+- About 7 GB of disk: 2.2 GB of weight parts, 2.2 GB of reassembled weights, plus the git history and the data.
 
 ## Data
 The competition images are not part of this repository. Download them from the competition page (the Kaggle API needs your own credentials and accepted competition rules):
@@ -137,7 +137,7 @@ Notes:
 - Internet is needed during training to download the pretrained initial weights.
 - On one GPU, add `--nproc 0 --accum 2` to the Mask R-CNN commands (the notebook does this). This runs without DDP and gives the same effective batch as our 2 DDP ranks of batch 1.
 - Retrained models will not be bit-identical to the delivered ones, because of GPU type, library versions and DDP.
-- The three training scripts are self-contained files built for Kaggle kernels: each carries copies of its helper modules in an `EMBEDDED` string. They are kept byte-identical to the scripts that produced the weights (hashes in `train/provenance.json`), so they were not tidied.
+- The three training scripts are self-contained files built for Kaggle kernels: each carries copies of its helper modules in an `EMBEDDED` string. They are kept as they were run (hashes and the two exceptions are in `train/provenance.json`), so they were not tidied.
 
 What has been checked:
 - The training scripts in `train/` are byte-identical to the scripts that produced the delivered weights. There are two documented exceptions, listed in `train/provenance.json`:
