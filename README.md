@@ -2,7 +2,7 @@
 
 Delivered solution of team JerryMouse.
 
-Solution for the Kaggle competition `filament-segmentation-2026`.
+Solution for the Kaggle competition `filament-segmentation-2026`. The method and its evaluation are described in our technical report, *Fusing Mask R-CNN and U-Net Predictions for Solar Filament Segmentation*, submitted to the organisers with this repository.
 - Input: H-alpha full-disk images at 2048 x 2048.
 - Output: one binary mask per filament, in the submission CSV format.
 - Inference uses only the test H-alpha images.
@@ -112,7 +112,7 @@ On our development machine (Windows, Python 3.13, RTX 3080 Ti) the output is byt
 
 Time and memory for the 180 images:
 - One RTX 3080 Ti: 2586 s (14.4 s per image), 3.77 GiB RAM, 3.48 GiB GPU memory.
-- Kaggle T4: 7436 s (41.3 s per image).
+- Kaggle T4: 7436 s (41.3 s per image) in the first run; the second run took 49.9 s per image (see "Reproducibility").
 
 ## Training
 Everything needed to retrain is in `train/`. The settings of every delivered checkpoint are in `train/provenance.json`: script hash, full arguments, seed, epochs, and the pretrained initial weights with URL (Hugging Face revision for ConvNeXt-T) and SHA-256.
