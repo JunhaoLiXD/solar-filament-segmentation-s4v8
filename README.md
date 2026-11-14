@@ -7,6 +7,11 @@ Solution for the Kaggle competition `filament-segmentation-2026`. The method and
 - Output: one binary mask per filament, in the submission CSV format.
 - Inference uses only the test H-alpha images.
 
+## Quick start
+- **Notebook:** [`demo.ipynb`](demo.ipynb) in the repository root runs the whole pipeline in order (weights, preprocessing, optional training, inference, evaluation). Its saved outputs come from a full run on a Kaggle T4, so it can be read without running it.
+- **Reproduce the submission from the stored weights (no training):** see [Run](#run-stored-weights-no-training); three commands after downloading the data.
+- Details: [Requirements](#requirements), [Data](#data), [Training](#training), [Layout](#layout).
+
 ## Names used in this repository
 The code keeps the short identifiers from our development work. They mean:
 
